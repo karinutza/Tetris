@@ -6,7 +6,7 @@
 #include "drawings.h"
 #include "../tetrominos/tetrominos.h"
 
-void Drawings(int grid[GRID_ROWS][GRID_COLS], int score, int highScore, int totalLines, int level, int currentTetromino, int playerX, int playerY, bool gameOver)
+void Drawings(int grid[GRID_ROWS][GRID_COLS], int score, int highScore, int totalLines, int level, int nextTetromino, int currentTetromino, int playerX, int playerY, bool gameOver)
 {
     BeginDrawing();
     ClearBackground(backgroundPINK);
@@ -60,7 +60,9 @@ void Drawings(int grid[GRID_ROWS][GRID_COLS], int score, int highScore, int tota
         (Rectangle){nextBoxX, nextBoxY, nextBoxWidth, nextBoxHeight},
         0.2f, 8, nextBoxPink);
 
-    DrawTetromino(currentTetromino, playerX, playerY, CELL_SIZE, OFFSET_X, OFFSET_Y, neonPink);
+    int previewX = (nextBoxX + nextBoxWidth / 2) / CELL_SIZE - 1;
+    int previewY = (nextBoxY + nextBoxHeight / 2) / CELL_SIZE - 1;
+    DrawTetromino(nextTetromino, previewX, previewY, CELL_SIZE, 0, 0, neonPink);
 
     // TITLE
     DrawText("TETRIS", 50, 50, 100, DARK_PINK);
@@ -92,7 +94,7 @@ void Drawings(int grid[GRID_ROWS][GRID_COLS], int score, int highScore, int tota
     {
         for (int j = 0; j < GRID_COLS; j++)
         {
-            if (grid[i][j] == 1)
+            if (grid[i][j] > 0)
             {
                 DrawRectangle(
                     OFFSET_X + j * CELL_SIZE,

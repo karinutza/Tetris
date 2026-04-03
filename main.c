@@ -58,7 +58,7 @@ int main(void)
                 gameOver = false;
             }
             
-            Drawings(grid, score, highScore, totalLines, level, nextTetromino, playerX, playerY, gameOver);
+            Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, gameOver);
             continue;
         }
 
@@ -137,8 +137,9 @@ int main(void)
                         if (tetrominos[currentTetromino][i][j] == 1) {
                             int gridX = playerX + j;
                             int gridY = playerY + i;
+                            
                             if (gridX >= 0 && gridX < GRID_COLS && gridY >= 0 && gridY < GRID_ROWS) {
-                                grid[gridY][gridX] = 1;
+                                grid[gridY][gridX] = currentTetromino + 1;
                             }
                         }   
                     }
@@ -146,6 +147,7 @@ int main(void)
 
                 currentTetromino = nextTetromino;
                 nextTetromino = GetRandomTetromino();
+                
                 playerX = 3;
                 playerY = -2;
 
@@ -196,7 +198,7 @@ int main(void)
         if (IsKeyPressed(KEY_SPACE))
             isHardDropping = true;
 
-        Drawings(grid, score, highScore, totalLines, level, nextTetromino, playerX, playerY, gameOver);
+        Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, gameOver);
     }
 
     CloseWindow();
