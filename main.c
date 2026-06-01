@@ -121,7 +121,10 @@ int main(void)
                         int newX = playerX + j;
                         int newY = playerY + i + 1;
 
-                        if (newX < 0 || newX >= GRID_COLS || newY >= GRID_ROWS || grid[newY][newX] == 1) {
+                        if (newX < 0 || newX >= GRID_COLS || newY >= GRID_ROWS) {
+                            canMoveDown = false;
+                        }
+                        if (newY >= 0 && newY < GRID_ROWS && grid[newY][newX] == 1) {
                             canMoveDown = false;
                         }
                     }
@@ -162,7 +165,7 @@ int main(void)
                         {
                             int x = playerX + j;
                             int y = playerY + i;
-                            if (y >= 0 && y < GRID_ROWS && grid[y][x] == 1)
+                            if (y >= 0 && y < GRID_ROWS && x >= 0 && x < GRID_COLS && grid[y][x] == 1)
                             {
                                 spawnCollides = true;
                             }
