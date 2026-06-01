@@ -41,3 +41,44 @@ int ClearFullRows(int grid[GRID_ROWS][GRID_COLS])
 
     return cleared;
 }
+
+// CLEAR FULL ROWS WITH TRACKING - returns which rows were cleared
+int ClearFullRowsWithTracking(int grid[GRID_ROWS][GRID_COLS], int clearedRows[GRID_ROWS])
+{
+    memset(clearedRows, 0, sizeof(int) * GRID_ROWS);
+    int cleared = 0;
+
+    for (int i = 0; i < GRID_ROWS; i++)
+    {
+        int full = 1;
+        for (int j = 0; j < GRID_COLS; j++)
+        {
+            if (grid[i][j] == 0)
+            {
+                full = 0;
+                break;
+            }
+        }
+
+        if (full)
+        {
+            clearedRows[i] = 1;
+            cleared++;
+
+            for (int k = i; k > 0; k--)
+            {
+                for (int j = 0; j < GRID_COLS; j++)
+                {
+                    grid[k][j] = grid[k - 1][j];
+                }
+            }
+
+            for (int j = 0; j < GRID_COLS; j++)
+            {
+                grid[0][j] = 0;
+            }
+        }
+    }
+
+    return cleared;
+}

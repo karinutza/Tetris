@@ -5,7 +5,7 @@ LDFLAGS = -L/opt/homebrew/lib -lraylib -lm -lpthread -ldl \
           -framework CoreVideo -framework IOKit -framework Cocoa -framework OpenGL
 
 # Fișiere sursă cu calea corectă
-SRCS = main.c tetrominos/tetrominos.c drawings/drawings.c clearRows/clearRows.c
+SRCS = main.c tetrominos/tetrominos.c drawings/drawings.c drawings/animations.c clearRows/clearRows.c
 OBJS = $(SRCS:.c=.o)
 
 # Executabil

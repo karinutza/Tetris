@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "raylib.h"
 
 #include "drawings/colors.h"
 #include "drawings/constants.h"
 #include "drawings/drawings.h"
+#include "drawings/animations.h"
 #include "tetrominos/tetrominos.h"
 #include "clearRows/clearRows.h"
 
@@ -32,6 +34,12 @@ int main(void)
 
     bool gameOver = false;
 
+    // Animation state
+    LineClearAnimation lineClearAnim = {0};
+    GameOverAnimation gameOverAnim = {0};
+    bool isLineClearAnimating = false;
+    int clearedRowsTracking[GRID_ROWS] = {0};
+
     InitWindow(900, 800, "Tetris Game");
     SetTargetFPS(60);
 
@@ -41,10 +49,30 @@ int main(void)
 
     while (!WindowShouldClose())
     {
-        //GAME OVER TEST
+        float deltaTime = GetFrameTime();
+
+        // Update animations
+        if (isLineClearAnimating) {
+            UpdateLineClearAnimation(&lineClearAnim, deltaTime);
+            if (IsLineClearAnimationFinished(&lineClearAnim)) {
+                isLineClearAnimating = false;
+                lineClearAnim.animation.isActive = false;
+            }
+        }
+
+        if (gameOverAnim.active) {
+            UpdateGameOverAnimation(&gameOverAnim, deltaTime);
+        }
+
+        // GAME OVER TEST
         if (gameOver)
         {
-            if (IsKeyPressed(KEY_R)){
+            // Start game over animation if not started yet
+            if (!gameOverAnim.active) {
+                gameOverAnim = CreateGameOverAnimation(0, 0.5f); // 0.5 second animation
+            }
+
+            if (IsKeyPressed(KEY_R)) {
                 // resetare
                 memset(grid, 0, sizeof(grid));
                 playerX = 3;
@@ -58,9 +86,17 @@ int main(void)
                 currentTetromino = GetRandomTetromino();
                 nextTetromino = GetRandomTetromino();
                 gameOver = false;
+                isLineClearAnimating = false;
+                gameOverAnim.active = false;
+                memset(clearedRowsTracking, 0, sizeof(clearedRowsTracking));
             }
 
-            Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, rotation, gameOver);
+            if (IsKeyPressed(KEY_Q)) {
+                break; // Exit game
+            }
+
+            Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino,
+                    playerX, playerY, rotation, gameOver, &lineClearAnim, &gameOverAnim);
             continue;
         }
 
@@ -248,21 +284,35 @@ int main(void)
                     }
                 }
 
-                if (spawnCollides)
+                if (spawnCollides) {
                     gameOver = true;
+                    gameOverAnim = CreateGameOverAnimation(0, 0.5f);
+                    gameOverAnim.active = true;
+                }
 
-                // Check top border - game over if blocks reach above grid
+                // Check top border - game over if blocks reach above grid (dramatic animation)
                 if (!gameOver) {
                     for (int j = 0; j < GRID_COLS; j++) {
                         if (grid[0][j] != 0) {
                             gameOver = true;
+                            gameOverAnim = CreateGameOverAnimation(1, 0.8f); // Dramatic effect, longer duration
+                            gameOverAnim.active = true;
                             break;
                         }
                     }
                 }
 
                 if (!gameOver){
-                    int cleared = ClearFullRows(grid);
+                    // Clear rows with tracking for animation
+                    memset(clearedRowsTracking, 0, sizeof(clearedRowsTracking));
+                    int cleared = ClearFullRowsWithTracking(grid, clearedRowsTracking);
+
+                    if (cleared > 0) {
+                        // Start line clear animation
+                        lineClearAnim = CreateLineClearAnimation(clearedRowsTracking, cleared, 0.25f);
+                        isLineClearAnimating = true;
+                    }
+
                     totalLines += cleared;
                     score += cleared * 100;
 
@@ -286,7 +336,7 @@ int main(void)
         if (IsKeyPressed(KEY_SPACE))
             isHardDropping = true;
 
-        Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, rotation, gameOver);
+        Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, rotation, gameOver, &lineClearAnim, &gameOverAnim);
     }
 
     CloseWindow();
