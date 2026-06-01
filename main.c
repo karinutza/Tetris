@@ -75,7 +75,7 @@ int main(void)
                         int newY = playerY + i;
                         if (newX < 0)
                             canMoveLeft = false;
-                        if (newY >= 0 && newY < GRID_ROWS && newX >= 0 && grid[newY][newX] == 1)
+                        if (newY >= 0 && newY < GRID_ROWS && newX >= 0 && grid[newY][newX] != 0)
                             canMoveLeft = false;
                     }
             if (canMoveLeft) playerX--;
@@ -97,7 +97,7 @@ int main(void)
                         int newY = playerY + i;
                         if (newX >= GRID_COLS)
                             canMoveRight = false;
-                        if (newY >= 0 && newY < GRID_ROWS && newX < GRID_COLS && grid[newY][newX] == 1)
+                        if (newY >= 0 && newY < GRID_ROWS && newX < GRID_COLS && grid[newY][newX] != 0)
                             canMoveRight = false;
                     }
             if (canMoveRight) playerX++;
@@ -124,7 +124,7 @@ int main(void)
                         if (newX < 0 || newX >= GRID_COLS || newY >= GRID_ROWS) {
                             canMoveDown = false;
                         }
-                        if (newY >= 0 && newY < GRID_ROWS && grid[newY][newX] == 1) {
+                        if (newY >= 0 && newY < GRID_ROWS && grid[newY][newX] != 0) {
                             canMoveDown = false;
                         }
                     }
@@ -165,7 +165,7 @@ int main(void)
                         {
                             int x = playerX + j;
                             int y = playerY + i;
-                            if (y >= 0 && y < GRID_ROWS && x >= 0 && x < GRID_COLS && grid[y][x] == 1)
+                            if (y >= 0 && y < GRID_ROWS && x >= 0 && x < GRID_COLS && grid[y][x] != 0)
                             {
                                 spawnCollides = true;
                             }
