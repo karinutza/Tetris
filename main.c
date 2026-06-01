@@ -108,23 +108,73 @@ int main(void)
         // ROTATION
         if (IsKeyPressed(KEY_UP))
         {
-            int newRotation = (rotation + 1) % 4;
-            bool canRotate = true;
-            for (int i = 0; i < BLOCK_SIZE; i++) {
-                for (int j = 0; j < BLOCK_SIZE; j++) {
-                    if (tetrominos[currentTetromino][newRotation][i][j] == 1) {
-                        int newX = playerX + j;
-                        int newY = playerY + i;
-                        if (newX < 0 || newX >= GRID_COLS || newY >= GRID_ROWS) {
-                            canRotate = false;
-                        }
-                        if (newY >= 0 && newY < GRID_ROWS && grid[newY][newX] != 0) {
-                            canRotate = false;
+            // O piece (square) doesn't rotate visibly
+            if (currentTetromino != 1) {
+                int newRotation = (rotation + 1) % 4;
+                bool canRotate = false;
+                int finalX = playerX;
+
+                // Check if rotation fits at given X position
+                bool rotationFits = true;
+                for (int i = 0; i < BLOCK_SIZE && rotationFits; i++) {
+                    for (int j = 0; j < BLOCK_SIZE && rotationFits; j++) {
+                        if (tetrominos[currentTetromino][newRotation][i][j] == 1) {
+                            int testX = playerX + j;
+                            int testY = playerY + i;
+                            // Check horizontal boundaries
+                            if (testX < 0 || testX >= GRID_COLS) {
+                                rotationFits = false;
+                            }
+                            // Check bottom boundary
+                            if (testY >= GRID_ROWS) {
+                                rotationFits = false;
+                            }
+                            // Check grid collision only in valid area
+                            if (testY >= 0 && testY < GRID_ROWS && grid[testY][testX] != 0) {
+                                rotationFits = false;
+                            }
                         }
                     }
                 }
+
+                // If rotation fits at current position, apply it
+                if (rotationFits) {
+                    canRotate = true;
+                } else {
+                    // Try wall kick - move 1 or 2 cells left/right
+                    int kickOffsets[] = {-1, 1, -2, 2};
+                    for (int k = 0; k < 4 && !canRotate; k++) {
+                        rotationFits = true;
+                        int kickX = playerX + kickOffsets[k];
+                        for (int i = 0; i < BLOCK_SIZE && rotationFits; i++) {
+                            for (int j = 0; j < BLOCK_SIZE && rotationFits; j++) {
+                                if (tetrominos[currentTetromino][newRotation][i][j] == 1) {
+                                    int testX = kickX + j;
+                                    int testY = playerY + i;
+                                    if (testX < 0 || testX >= GRID_COLS) {
+                                        rotationFits = false;
+                                    }
+                                    if (testY >= GRID_ROWS) {
+                                        rotationFits = false;
+                                    }
+                                    if (testY >= 0 && testY < GRID_ROWS && grid[testY][testX] != 0) {
+                                        rotationFits = false;
+                                    }
+                                }
+                            }
+                        }
+                        if (rotationFits) {
+                            canRotate = true;
+                            finalX = kickX;
+                        }
+                    }
+                }
+
+                if (canRotate) {
+                    rotation = newRotation;
+                    playerX = finalX;
+                }
             }
-            if (canRotate) rotation = newRotation;
         }
 
         // FALLING
