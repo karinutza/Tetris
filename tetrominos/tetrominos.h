@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <time.h>
 
-extern int tetrominos[NUM_TETROMINOS][BLOCK_SIZE][BLOCK_SIZE];
+extern int tetrominos[NUM_TETROMINOS][4][BLOCK_SIZE][BLOCK_SIZE];
 
-void InitTetrominos();                  
-int GetRandomTetromino();                
-void DrawTetromino(int tetrominoIndex, int playerX, int playerY, int cellSize, int offsetX, int offsetY, Color color);
+void InitTetrominos();
+int GetRandomTetromino();
+void DrawTetromino(int tetrominoIndex, int rotation, int playerX, int playerY, int cellSize, int offsetX, int offsetY, Color color);
 
 #endif

@@ -1,8 +1,17 @@
 #include "tetrominos.h"
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
-int tetrominos[NUM_TETROMINOS][BLOCK_SIZE][BLOCK_SIZE];
+int tetrominos[NUM_TETROMINOS][4][BLOCK_SIZE][BLOCK_SIZE];
+
+void RotateClockwise(int src[BLOCK_SIZE][BLOCK_SIZE], int dst[BLOCK_SIZE][BLOCK_SIZE]) {
+    for(int i = 0; i < BLOCK_SIZE; i++) {
+        for(int j = 0; j < BLOCK_SIZE; j++) {
+            dst[j][BLOCK_SIZE - 1 - i] = src[i][j];
+        }
+    }
+}
 
 void InitTetrominos() {
     // I
@@ -53,14 +62,6 @@ void InitTetrominos() {
         {0,0,0,0}
     };
 
-    //I V   
-    int IV[BLOCK_SIZE][BLOCK_SIZE] = {
-    {1,0,0,0},
-    {1,0,0,0},
-    {1,0,0,0},
-    {1,0,0,0}
-    };
-
     // L
     int L[BLOCK_SIZE][BLOCK_SIZE] = {
         {0,0,1,0},
@@ -69,38 +70,46 @@ void InitTetrominos() {
         {0,0,0,0}
     };
 
-    // Copiază formele în tetrominos
-    for(int t=0; t<NUM_TETROMINOS; t++) {
-        int (*src)[BLOCK_SIZE];
-        switch(t) {
-            case 0: src = I; break;
-            case 1: src = O; break;
-            case 2: src = T; break;
-            case 3: src = S; break;
-            case 4: src = Z; break;
-            case 5: src = J; break;
-            case 6: src = L; break;
-            case 7: src = IV; break;
+    // I vertical
+    int IV[BLOCK_SIZE][BLOCK_SIZE] = {
+        {1,0,0,0},
+        {1,0,0,0},
+        {1,0,0,0},
+        {1,0,0,0}
+    };
+
+    int (*shapes[NUM_TETROMINOS])[BLOCK_SIZE][BLOCK_SIZE] = {
+        (int (*)[BLOCK_SIZE][BLOCK_SIZE])I,
+        (int (*)[BLOCK_SIZE][BLOCK_SIZE])O,
+        (int (*)[BLOCK_SIZE][BLOCK_SIZE])T,
+        (int (*)[BLOCK_SIZE][BLOCK_SIZE])S,
+        (int (*)[BLOCK_SIZE][BLOCK_SIZE])Z,
+        (int (*)[BLOCK_SIZE][BLOCK_SIZE])J,
+        (int (*)[BLOCK_SIZE][BLOCK_SIZE])L,
+        (int (*)[BLOCK_SIZE][BLOCK_SIZE])IV
+    };
+
+    for(int t = 0; t < NUM_TETROMINOS; t++) {
+        int temp[BLOCK_SIZE][BLOCK_SIZE];
+        memcpy(tetrominos[t][0], shapes[t], sizeof(int) * BLOCK_SIZE * BLOCK_SIZE);
+
+        for(int rot = 1; rot < 4; rot++) {
+            RotateClockwise(tetrominos[t][rot - 1], temp);
+            memcpy(tetrominos[t][rot], temp, sizeof(int) * BLOCK_SIZE * BLOCK_SIZE);
         }
-        for(int i=0;i<BLOCK_SIZE;i++)
-            for(int j=0;j<BLOCK_SIZE;j++)
-                tetrominos[t][i][j] = src[i][j];
     }
 
-    // Inițializează seed-ul random
     srand(time(NULL));
 }
 
-// Returnează un tetromino random
 int GetRandomTetromino() {
     return rand() % NUM_TETROMINOS;
 }
 
-// Desenează un tetromino în grid
-void DrawTetromino(int tetrominoIndex, int playerX, int playerY, int cellSize, int offsetX, int offsetY, Color color) {
+void DrawTetromino(int tetrominoIndex, int rotation, int playerX, int playerY, int cellSize, int offsetX, int offsetY, Color color) {
     for(int i = 0; i < BLOCK_SIZE; i++) {
         for(int j = 0; j < BLOCK_SIZE; j++) {
-            if(tetrominos[tetrominoIndex][i][j] == 1) {
+            if(tetrominos[tetrominoIndex][rotation][i][j] == 1) {
                 DrawRectangle(
                     offsetX + (playerX + j) * cellSize,
                     offsetY + (playerY + i) * cellSize,

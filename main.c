@@ -15,6 +15,7 @@ int main(void)
 {
     int grid[GRID_ROWS][GRID_COLS] = {0};
     int playerX = 3, playerY = -2;
+    int rotation = 0;
 
     bool isHardDropping = false;
     float hardDropSpeed = 0.01f;
@@ -35,7 +36,7 @@ int main(void)
     SetTargetFPS(60);
 
     InitTetrominos();
-    int currentTetromino = GetRandomTetromino();  
+    int currentTetromino = GetRandomTetromino();
     int nextTetromino = GetRandomTetromino();      
 
     while (!WindowShouldClose())
@@ -48,6 +49,7 @@ int main(void)
                 memset(grid, 0, sizeof(grid));
                 playerX = 3;
                 playerY = -2;
+                rotation = 0;
                 score = 0;
                 totalLines = 0;
                 level = 1;
@@ -57,8 +59,8 @@ int main(void)
                 nextTetromino = GetRandomTetromino();
                 gameOver = false;
             }
-            
-            Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, gameOver);
+
+            Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, rotation, gameOver);
             continue;
         }
 
@@ -69,7 +71,7 @@ int main(void)
             bool canMoveLeft = true;
             for (int i = 0; i < BLOCK_SIZE; i++)
                 for (int j = 0; j < BLOCK_SIZE; j++)
-                    if (tetrominos[currentTetromino][i][j] == 1)
+                    if (tetrominos[currentTetromino][rotation][i][j] == 1)
                     {
                         int newX = playerX + j - 1;
                         int newY = playerY + i;
@@ -91,7 +93,7 @@ int main(void)
             bool canMoveRight = true;
             for (int i = 0; i < BLOCK_SIZE; i++)
                 for (int j = 0; j < BLOCK_SIZE; j++)
-                    if (tetrominos[currentTetromino][i][j] == 1)
+                    if (tetrominos[currentTetromino][rotation][i][j] == 1)
                     {
                         int newX = playerX + j + 1;
                         int newY = playerY + i;
@@ -101,6 +103,28 @@ int main(void)
                             canMoveRight = false;
                     }
             if (canMoveRight) playerX++;
+        }
+
+        // ROTATION
+        if (IsKeyPressed(KEY_UP))
+        {
+            int newRotation = (rotation + 1) % 4;
+            bool canRotate = true;
+            for (int i = 0; i < BLOCK_SIZE; i++) {
+                for (int j = 0; j < BLOCK_SIZE; j++) {
+                    if (tetrominos[currentTetromino][newRotation][i][j] == 1) {
+                        int newX = playerX + j;
+                        int newY = playerY + i;
+                        if (newX < 0 || newX >= GRID_COLS || newY >= GRID_ROWS) {
+                            canRotate = false;
+                        }
+                        if (newY >= 0 && newY < GRID_ROWS && grid[newY][newX] != 0) {
+                            canRotate = false;
+                        }
+                    }
+                }
+            }
+            if (canRotate) rotation = newRotation;
         }
 
         // FALLING
@@ -117,7 +141,7 @@ int main(void)
             bool canMoveDown = true;
             for (int i = 0; i < BLOCK_SIZE; i++) {
                 for (int j = 0; j < BLOCK_SIZE; j++) {
-                    if (tetrominos[currentTetromino][i][j] == 1) {
+                    if (tetrominos[currentTetromino][rotation][i][j] == 1) {
                         int newX = playerX + j;
                         int newY = playerY + i + 1;
 
@@ -137,22 +161,23 @@ int main(void)
                 // LOCK BLOCK
                 for (int i = 0; i < BLOCK_SIZE; i++) {
                     for (int j = 0; j < BLOCK_SIZE; j++) {
-                        if (tetrominos[currentTetromino][i][j] == 1) {
+                        if (tetrominos[currentTetromino][rotation][i][j] == 1) {
                             int gridX = playerX + j;
                             int gridY = playerY + i;
-                            
+
                             if (gridX >= 0 && gridX < GRID_COLS && gridY >= 0 && gridY < GRID_ROWS) {
                                 grid[gridY][gridX] = currentTetromino + 1;
                             }
-                        }   
+                        }
                     }
                 }
 
                 currentTetromino = nextTetromino;
                 nextTetromino = GetRandomTetromino();
-                
+
                 playerX = 3;
                 playerY = -2;
+                rotation = 0;
 
 
                 // DETECTARE GAME OVER
@@ -161,7 +186,7 @@ int main(void)
                 {
                     for (int j = 0; j < BLOCK_SIZE; j++)
                     {
-                        if (tetrominos[currentTetromino][i][j] == 1)
+                        if (tetrominos[currentTetromino][rotation][i][j] == 1)
                         {
                             int x = playerX + j;
                             int y = playerY + i;
@@ -175,6 +200,16 @@ int main(void)
 
                 if (spawnCollides)
                     gameOver = true;
+
+                // Check top border - game over if blocks reach above grid
+                if (!gameOver) {
+                    for (int j = 0; j < GRID_COLS; j++) {
+                        if (grid[0][j] != 0) {
+                            gameOver = true;
+                            break;
+                        }
+                    }
+                }
 
                 if (!gameOver){
                     int cleared = ClearFullRows(grid);
@@ -201,7 +236,7 @@ int main(void)
         if (IsKeyPressed(KEY_SPACE))
             isHardDropping = true;
 
-        Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, gameOver);
+        Drawings(grid, score, highScore, totalLines, level, nextTetromino, currentTetromino, playerX, playerY, rotation, gameOver);
     }
 
     CloseWindow();

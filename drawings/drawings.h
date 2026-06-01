@@ -4,5 +4,5 @@
 #include "raylib.h"
 #include "constants.h"
 
-void Drawings(int grid[GRID_ROWS][GRID_COLS], int score, int highScore, int totalLines, int level, int nextTetromino, int currentTetromino, int playerX, int playerY, bool gameOver);
+void Drawings(int grid[GRID_ROWS][GRID_COLS], int score, int highScore, int totalLines, int level, int nextTetromino, int currentTetromino, int playerX, int playerY, int rotation, bool gameOver);
 #endif
